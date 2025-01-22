@@ -39,7 +39,7 @@ let lerp = (a,b,t) => a+(b-a)*(1-Math.cos(t*Math.PI))/2;
 
 const noise =(x)=>{
 	x = x*0.005%255;
-	return lerp(layer[Math.floor(x)],layer[Math.ceil(x)],x-Math.floor(x)) * 1.5 - 120;
+	return lerp(layer[Math.floor(x)],layer[Math.ceil(x)],x-Math.floor(x)) * 1.5 - 110;
 }
 
 class modals {

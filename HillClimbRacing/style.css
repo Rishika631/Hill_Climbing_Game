@@ -1,52 +1,52 @@
-	* {
+* {
 
-		margin: 0;
+	margin: 0;
 
-		padding: 0;
+	padding: 0;
 
-		box-sizing: border-box;
+	box-sizing: border-box;
 
-		font-family: dashboard;
+	font-family: dashboard;
 
-		transition:all 0.3s ease-in-out;
+	transition:all 0.3s ease-in-out;
 
-		user-select: none;
+	user-select: none;
 
-	}
+}
 
 
 
-	::-webkit-scrollbar {
+::-webkit-scrollbar {
 
-		display: none;
+	display: none;
 
-	}
+}
 
-	.modal {
+.modal {
 
-	box-shadow: 0 12px 19px 1.5px rgba(0, 0, 0, 0.14), 0 4.5px 23px 4px rgba(0, 0, 0, 0.12), 0 5.5px 7.5px -3.5px rgba(0, 0, 0, 0.2);
+box-shadow: 0 12px 19px 1.5px rgba(0, 0, 0, 0.14), 0 4.5px 23px 4px rgba(0, 0, 0, 0.12), 0 5.5px 7.5px -3.5px rgba(0, 0, 0, 0.2);
 
-	position: fixed;
+position: fixed;
 
-	left: 0;right: 0;
+left: 0;right: 0;
 
-	top: 5vh;
+top: 5vh;
 
-	background-color: #319deb;
+background-color: #319deb;
 
-	max-height: 70%;
+max-height: 70%;
 
-	width: 55%;
+width: 55%;
 
-	margin: auto;
+margin: auto;
 
-	overflow-y: auto;
+overflow-y: auto;
 
-	border-radius: 5%;
+border-radius: 5%;
 
-	will-change: top, opacity;
+will-change: top, opacity;
 
-	z-index: 2;
+z-index: 2;
 
 }
 
@@ -54,13 +54,13 @@
 
 .modal:hover {
 
-	
 
-	outline: none;
 
-	box-shadow: 0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12), 0 11px 15px -7px rgba(0, 0, 0, 0.2);
+outline: none;
 
-	
+box-shadow: 0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12), 0 11px 15px -7px rgba(0, 0, 0, 0.2);
+
+
 
 }
 
@@ -68,11 +68,11 @@
 
 .modal h1{
 
-	margin-top: 0;
+margin-top: 0;
 
-	font-size: 1.5rem;
+font-size: 1.5rem;
 
-	text-align: center;
+text-align: center;
 
 }
 
@@ -80,19 +80,19 @@
 
 .modal .modal-content {
 
-	padding: 24px;
+padding: 24px;
 
-	width: 15rem;
+width: 15rem;
 
-	display: flex;
+display: flex;
 
-	margin: auto;
+margin: auto;
 
 }
 
 .modal:hover >.modal-content{
 
-	transform: rotate(-20deg);
+transform: rotate(-20deg);
 
 }
 
@@ -100,7 +100,7 @@
 
 .modal .modal-close {
 
-	cursor: pointer;
+cursor: pointer;
 
 }
 
@@ -108,17 +108,17 @@
 
 .modal .modal-footer {
 
-	border-radius: 0 0 2px 2px;
+border-radius: 0 0 2px 2px;
 
-	background-color: #fafafa;
+background-color: #fafafa;
 
-	padding: 4px 6px;
+padding: 4px 6px;
 
-	height: 56px;
+height: 56px;
 
-	width: 100%;
+width: 100%;
 
-	text-align: right;
+text-align: right;
 
 }
 
@@ -126,9 +126,9 @@
 
 .modal.modal-fixed-footer {
 
-	padding: 0;
+padding: 0;
 
-	height: 70%;
+height: 70%;
 
 }
 
@@ -136,15 +136,15 @@
 
 .modal.modal-fixed-footer .modal-content {
 
-	position: absolute;
+position: absolute;
 
-	height: calc(100% - 56px);
+height: calc(100% - 56px);
 
-	max-height: 100%;
+max-height: 100%;
 
-	width: 100%;
+width: 100%;
 
-	overflow-y: auto;
+overflow-y: auto;
 
 }
 
@@ -152,11 +152,11 @@
 
 .modal.modal-fixed-footer .modal-footer {
 
-	border-top: 1px solid rgba(0, 0, 0, 0.1);
+border-top: 1px solid rgba(0, 0, 0, 0.1);
 
-	position: absolute;
+position: absolute;
 
-	bottom: 0;
+bottom: 0;
 
 }
 
@@ -164,35 +164,35 @@
 
 .options {
 
-	display: absolute;
+display: absolute;
 
-	grid-template-columns: 200px 200px 200px;
+grid-template-columns: 200px 200px 200px;
 
-	grid-column-gap: 10px;
+grid-column-gap: 10px;
 
-	padding-bottom: 1rem;
+padding-bottom: 1rem;
 
-	justify-content: center;
+justify-content: center;
 
-	will-change: bottom, opacity;
+will-change: bottom, opacity;
 
 }
 
 .option-content {
 
-	transition:padding-bottom 0.3s ease-in-out;
+transition:padding-bottom 0.3s ease-in-out;
 
-	height: 0;
+height: 0;
 
-	padding: 40px 70px;
+padding: 40px 70px;
 
-	background-color: #0e9e5b;
+background-color: #0e9e5b;
 
-	display: flex;
+display: flex;
 
-	justify-content: center;
+justify-content: center;
 
-	align-items:center;
+align-items:center;
 
 }
 
@@ -200,7 +200,7 @@
 
 .option-name {
 
-	color:#fff;
+color:#fff;
 
 }
 
@@ -208,11 +208,11 @@
 
 .mob_box {
 
-	display: flex;
+display: flex;
 
-	justify-content: center;
+justify-content: center;
 
-	align-items: center;
+align-items: center;
 
 }
 
@@ -220,13 +220,13 @@
 
 .left , .right {
 
-	width: 50vw;
+width: 50vw;
 
-	height: 80%;
+height: 80%;
 
-	z-index: 1;
+z-index: 1;
 
-	position: absolute;
+position: absolute;
 
 }
 
