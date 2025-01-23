@@ -18,6 +18,11 @@ if(typeof(localStorage.feuls) == "undefined" || localStorage.feuls == "NaN"){
 	localStorage.setItem('feuls',10);
 }
 
+// High score initialization
+if (typeof localStorage.highScore === "undefined" || localStorage.highScore === "NaN") {
+    localStorage.setItem("highScore", 0);
+}
+
 //left, right, top, bottom of keybords
 let keys = [37,39,38,40];
 
@@ -59,11 +64,21 @@ class modals {
 
 const modal = new modals();
 
+// Function to update high score
+const updateHighScore = () => {
+    const currentCoins = parseInt(localStorage.coins);
+    const highScore = parseInt(localStorage.highScore);
+    if (currentCoins > highScore) {
+        localStorage.highScore = currentCoins;
+    }
+};
+
 class thisGame{
 	constructor(){
 		this.state = 0;		
 	}
 	reset(){
+		updateHighScore();
 		position=0;
 		speed=0;
 		acc=0;
@@ -74,6 +89,8 @@ class thisGame{
 		player.rSpeed = 0;
 		bg.coinCount=0;
 		player.ySpeed = 0;
+		localStorage.coins = 0;
+        localStorage.feuls = 10;
 	}
 	start(){
 		this.state = 1;
@@ -83,6 +100,29 @@ class thisGame{
 	}
 }
 const game = new thisGame();
+
+class Wheel {
+    constructor(x, y, radius, imageSrc) {
+        this.position = { x: x, y: y };
+        this.radius = radius;
+        this.rotation = 0;
+        this.image = new Image();
+        this.image.src = imageSrc;
+    }
+
+    rotate(speed) {
+        // Wheels rotate based on speed. The faster the speed, the faster they rotate.
+        this.rotation += (speed * 0.1) % 360;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.position.x, this.position.y);
+        ctx.rotate(this.rotation * Math.PI / 180); // Convert rotation to radians
+        ctx.drawImage(this.image, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
+        ctx.restore();
+    }
+}
 
 // Background
 
@@ -116,6 +156,7 @@ class background{
 				ctx.drawImage(this.coinImg,50,70,30,30);
 				this.dashboard.text('#fde318',localStorage.coins,100,100);
 				this.dashboard.text('#ff6347', "Fuel: " + Math.round(localStorage.feuls), c.width-300, 100); // Fuel
+				this.dashboard.text("#4caf50", "High Score: " + localStorage.highScore, c.width / 2 - 100, 50); // High Score
 			},
 			saveCoins: () => {
 				localStorage.coins = ((parseInt(localStorage.coins)) + 1); // Increment coins
@@ -153,8 +194,14 @@ class play{
 		this.height = 50;
 		this.rot = 0;
 		this.image = new Image;
-		this.image.src = 'img/Cars/car2.png';
+		this.image.src = 'img/Cars/body.png';
+		this.head = new Image();
+        this.head.src = 'img/Cars/head.png';
 		this.rSpeed = 0;
+		 // Define the wheels and their positions
+		 const wheelRadius = 40;
+		 this.frontWheel = new Wheel(this.position.x, this.position.y-30, wheelRadius, 'img/Cars/wheel1.png');
+		 this.rearWheel = new Wheel(this.position.x, this.position.y + 25, wheelRadius, 'img/Cars/wheel2.png');
 	}
 	draw(){
 		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.6);
@@ -166,7 +213,7 @@ class play{
 			this.grounded = 1; //staying on ground
 		}
 
-		this.p1 > (this.position.y+15) ? this.ySpeed += 1 : makeGrounded();
+		this.p1 > (this.position.y+15) ? this.ySpeed += 0.3 : makeGrounded();
 
 		this.angle = Math.atan2(this.p2-this.position.y-15,5);
 		this.position.y += this.ySpeed;
@@ -187,14 +234,36 @@ class play{
 				this.rSpeed -= this.angle - this.rot;
 			}
 		}
+		let headTilt = Math.sign(speed) * Math.min(Math.abs(speed) / 8, Math.PI / 8); // Speed-based tilt
 		this.rot -= this.rSpeed/20;
 		ctx.save();
 		ctx.translate(this.position.x,this.position.y);
 		ctx.rotate(this.rot);
-		ctx.drawImage(this.image,-15,-15,this.width,this.height);
-		ctx.restore();
+		ctx.drawImage(this.image,-15,-100,2*this.width,2*this.height);
+
+
+		this.frontWheel.position.x = 140;
+		this.frontWheel.position.y = 0;
+		
+		this.rearWheel.position.x = 5;
+		this.rearWheel.position.y = 0;
+
+		
+		// Draw the wheels with their updated positions
+		this.frontWheel.rotate(20*speed);
+		this.frontWheel.draw(ctx);
+		
+		this.rearWheel.rotate(20*speed);
+		this.rearWheel.draw(ctx);
+    ctx.save();
+    ctx.translate(this.width / 2, -120); // Move pivot point to the car's head
+    ctx.rotate(headTilt); // Rotate for head tilt
+    ctx.drawImage(this.head, -this.width/3, -15, this.width, 40); // Draw head image
+    ctx.restore();
+
+    ctx.restore();
 		if (localStorage.feuls > 0) {
-			localStorage.feuls -= speed * 0.001;  // Fuel consumption based on speed
+			localStorage.feuls -= speed * 0.008;  // Fuel consumption based on speed
 		} else {
 			localStorage.feuls = 0;  // Fuel shouldn't go negative
 		}
@@ -208,7 +277,7 @@ class coin {
 	constructor(xPos) {
 		this.ySpeed = 0;
 		this.position = {x:xPos,y:0};
-		this.width = 34,this.height = 34;
+		this.width = 50,this.height = 50;
 		this.image = new Image;
 		this.image.src = 'img/coin.png';
 	}
@@ -258,7 +327,7 @@ class feul {
 	constructor(xPos) {
 		this.ySpeed = 0;
 		this.position = {x:xPos,y:0};
-		this.width = 34,this.height = 34;
+		this.width = 50,this.height = 50;
 		this.image = new Image;
 		this.image.src = 'img/feul.png';
 	}
@@ -289,7 +358,7 @@ class feul {
 var feuls = {
 	allfeuls : [],
 	add: ()=>{
-		if (feuls.allfeuls.length < 200) {
+		if (feuls.allfeuls.length < 30) {
 			feuls.allfeuls.push(new feul((feuls.allfeuls.length) * ((Math.random() * 1000) + 100)));
 		}
 		feuls.allfeuls.forEach((item)=> item.draw());
@@ -326,12 +395,14 @@ class Object {
 	}
 }
 var objects = {
-	allObjects : [],
-	add: ()=>{
-		objects.allObjects.length < 100 ? objects.allObjects.push(new Object((objects.allObjects.length)*((Math.random()*1000)+200))): console.dir(objects.allObjects.length);
-		objects.allObjects.forEach((item)=> item.draw());
-	}
-}
+    allObjects: [],
+    add: () => {
+        if (objects.allObjects.length < 100) {
+            objects.allObjects.push(new Object((objects.allObjects.length) * ((Math.random() * 1000) + 200)));
+        }
+        objects.allObjects.forEach((item) => item.draw());
+    }
+};
 
 // functions of keyboard clicks
 
@@ -376,6 +447,16 @@ const loop =(time)=>{
 	coins.collide();
 	feuls.add();
 	feuls.collide();
+		// End the game if fuel is 0
+		if (localStorage.feuls <= 0) {
+			localStorage.feuls = 0; // Ensure fuel doesn't go negative
+			game.state = 0; // Stop the game loop
+			modal.open();
+			modalBox.children[0].innerHTML =
+				"Game Over! <br> Your fuel is depleted. <br> You collected " +
+				localStorage.coins +
+				" coins.";
+		}
 	game.state ? requestAnimationFrame(loop): cancelAnimationFrame(loop);
 	bg.time.end(time);
 }
