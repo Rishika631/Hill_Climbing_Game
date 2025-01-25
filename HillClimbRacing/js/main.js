@@ -1,12 +1,9 @@
-// variables and constants
 const c = document.getElementById('canvas');
 c.width = window.innerWidth;
 c.height =  window.innerHeight; 
 const ctx = c.getContext('2d');
 const p = document.getElementById('p');
 const modalBox = document.getElementsByClassName('modal')[0];
-const leftBox = document.getElementsByClassName('left')[0];
-const rightBox = document.getElementsByClassName('right')[0];
 
 window.addEventListener('resize',()=>c.width = window.innerWidth);
 
@@ -14,25 +11,17 @@ if(typeof(localStorage.coins) == "undefined" || localStorage.coins == "NaN"){
 	localStorage.setItem('coins',0);
 }
 
-if(typeof(localStorage.feuls) == "undefined" || localStorage.feuls == "NaN"){
-	localStorage.setItem('feuls',10);
+if(typeof(localStorage.fuels) == "undefined" || localStorage.fuels == "NaN"){
+	localStorage.setItem('fuels',100);
 }
-
-// High score initialization
 if (typeof localStorage.highScore === "undefined" || localStorage.highScore === "NaN") {
     localStorage.setItem("highScore", 0);
 }
 
-//left, right, top, bottom of keybords
 let keys = [37,39,38,40];
-
-
-// physics of car
 let acc = 0;
 let speed = 0;
 let position = 0;
-
-// functions related to physics of ground.
 
 let layer = [];
 while(layer.length < 255){
@@ -48,9 +37,6 @@ const noise =(x)=>{
 }
 
 class modals {
-	// constructor(){
-
-	// }
 	open(){
 		modalBox.style.display='grid';
 	}
@@ -58,13 +44,15 @@ class modals {
 		modalBox.style.display='none';
 	}
 	gameloss(){
-		modalBox.children[0].innerHTML = "Sorry You Lose <br> You have "+localStorage.coins+ " coins";
+		modalBox.children[0].innerHTML = "Game Over! <br> You have "+localStorage.coins+ " coins";
 	}
 }
 
 const modal = new modals();
+const bgm = new Audio('sounds/bgm.mp3');
+bgm.loop = true;
+bgm.volume = 0.2;
 
-// Function to update high score
 const updateHighScore = () => {
     const currentCoins = parseInt(localStorage.coins);
     const highScore = parseInt(localStorage.highScore);
@@ -84,18 +72,19 @@ class thisGame{
 		acc=0;
 		player.rot=0;
 		coins.allCoins = [];
-		feuls.allfeuls = [];
+		fuels.allFuels = [];
 		objects.allObjects = [];
 		player.rSpeed = 0;
 		bg.coinCount=0;
 		player.ySpeed = 0;
 		localStorage.coins = 0;
-        localStorage.feuls = 10;
+        localStorage.fuels = 100;
 	}
 	start(){
 		this.state = 1;
 		this.reset();
 		modal.close();
+		bgm.play();
 		loop();
 	}
 }
@@ -111,7 +100,6 @@ class Wheel {
     }
 
     rotate(speed) {
-        // Wheels rotate based on speed. The faster the speed, the faster they rotate.
         this.rotation += (speed * 0.1) % 360;
     }
 
@@ -124,7 +112,6 @@ class Wheel {
     }
 }
 
-// Background
 
 class background{
 	constructor(){
@@ -132,7 +119,10 @@ class background{
 		this.image.src = 'img/tile.png';
 		this.skyImage = new Image;
         this.skyImage.src = 'img/background.png';
-		this.time = { // Timimg
+		this.checkpoints = []; 
+        this.nextCheckpoint = 5000; 
+        this.createCheckpoints();
+		this.time = { 
 			lastTime: 0,
 			start: (currentTime)=>{
 				this.deltaTime = currentTime - this.lastTime;
@@ -142,50 +132,130 @@ class background{
 				this.lastTime = currentTime;
 			}
 		};
-		this.dashboard = { // Dashboard
+		this.dashboard = { 
 			text: (color,text,x,y)=>{
 			 	ctx.font="40px dashboard";
 			 	ctx.fillStyle = color;
 			 	ctx.fillText(text,x,y);
 			},
 			show: ()=>{
-				this.dashboard.text('#ff4d4d',Math.round(position)+ ' m',50,50); // Distance
-				this.dashboard.text('#ff4d4d',Math.round(Math.abs(speed))+' km/h',c.width-300,50); // Speed
+				this.dashboard.text('#ff4d4d',"High Score: " + localStorage.highScore,50,50); 
+				this.dashboard.text('#ff4d4d',Math.round(Math.abs(speed))+' km/h',c.width-300,50); 
 				this.coinImg = new Image();
 				this.coinImg.src = 'img/coin.png';
 				ctx.drawImage(this.coinImg,50,70,30,30);
 				this.dashboard.text('#fde318',localStorage.coins,100,100);
-				this.dashboard.text('#ff6347', "Fuel: " + Math.round(localStorage.feuls), c.width-300, 100); // Fuel
-				this.dashboard.text("#4caf50", "High Score: " + localStorage.highScore, c.width / 2 - 100, 50); // High Score
+				this.fuelImg = new Image;
+				this.fuelImg.src = 'img/fuel.png';
+				ctx.drawImage(this.fuelImg,c.width-340,75,30,30);
 			},
 			saveCoins: () => {
-				localStorage.coins = ((parseInt(localStorage.coins)) + 1); // Increment coins
+				localStorage.coins = ((parseInt(localStorage.coins)) + 1);
 			},
 			saveFuel: () => {
-				localStorage.feuls = ((parseInt(localStorage.feuls)) + 5); // Increment fuel
+				let currentFuel = (parseInt(localStorage.fuels));
+				currentFuel += 10;
+				if (currentFuel > 100) {
+    				currentFuel = 100;
+				}
+				localStorage.fuels=currentFuel;
 			}
 		};
-		this.sky = { // Sky
+		this.sky = { 
 			draw: () => {
-				// Clear the previous sky to prevent overlapping
 				ctx.clearRect(0, 0, c.width, c.height);
-		
-				// Draw the sky image
-				ctx.drawImage(this.skyImage, 0, 0, c.width, c.height); // Covers the top half of the canvas
+				ctx.drawImage(this.skyImage, 0, 0, c.width, c.height); 
 			}
 		};
 
-		this.tile = {//Ground 
+		this.tile = {
 			draw: ()=>{
 				ctx.drawImage(this.image,0,0,0,c.height,0,0,0,c.height); 
-					for(let i = 0;i < c.width;i++) ctx.drawImage(this.image,i,(0.9*c.height-noise(i+position)*0.5));		
+					for(let i = 0;i < c.width;i++) ctx.drawImage(this.image,i,(0.9*c.height-noise(i+position)*0.7));		
 			}}
 	}
+	createCheckpoints() {
+        for (let i = 1; i <= 20; i++) { 
+            this.checkpoints.push(i * 5000);
+        }
+	}
+	drawFuelBar() {
+		const fuelBarWidth = 200; 
+		const fuelBarHeight = 20; 
+		const fuelBarX = c.width-300; 
+		const fuelBarY = c.height/9; 
+		const maxFuel = 100;
+		const currentFuel = Math.min(parseInt(localStorage.fuels), maxFuel);
+		const fuelProgress = currentFuel / maxFuel;
+		ctx.fillStyle = "rgba(211, 211, 211, 0)";
+		ctx.fillRect(fuelBarX, fuelBarY, fuelBarWidth, fuelBarHeight);
+		ctx.strokeStyle = "black";
+		ctx.lineWidth = 2;
+		ctx.strokeRect(fuelBarX, fuelBarY, fuelBarWidth, fuelBarHeight);
+		ctx.fillStyle = "#eb3131";
+		ctx.fillRect(fuelBarX, fuelBarY, fuelBarWidth * fuelProgress, fuelBarHeight);
+	}
+	
+		drawProgressBar() {
+			const progressBarWidth = c.width/3;
+			const progressBarHeight = 20;
+			const progressBarX = c.width/3;
+			const progressBarY = c.height/20;
+			
+			const currentCheckpoint = 0; 
+			const maxDistance = this.nextCheckpoint; 
+			const progress = Math.min((position - currentCheckpoint) / (maxDistance - currentCheckpoint), 1);
+	
+			ctx.fillStyle = "rgba(211, 211, 211, 0)";
+			ctx.fillRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 2; 
+			ctx.strokeRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight);
+	
+			ctx.fillStyle = "#4caf50";
+			ctx.fillRect(progressBarX, progressBarY, progressBarWidth * progress, progressBarHeight);
+	
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "#4caf50";
+			ctx.fillText(`Checkpoint: ${Math.round(position)} / ${maxDistance} m`, progressBarX+progressBarX/6, progressBarY - 5);
+		}
+		showCheckpointImage(duration) {
+			const checkpointImage = new Image();
+			checkpointImage.src = 'img/checkpoints.png';
+		
+			const startTime = performance.now();
+		
+			const drawImage = (currentTime) => {
+				const elapsedTime = currentTime - startTime;
+				if (elapsedTime < duration) {
+					ctx.save();
+					ctx.drawImage(checkpointImage, c.width/2-100, c.height/10, c.width/8, 80);
+					ctx.restore();
+					requestAnimationFrame(drawImage);
+				}
+			};
+		
+			checkpointImage.onload = () => {
+				requestAnimationFrame(drawImage);
+			};
+		}
+	
+		checkCheckpoint() {
+			if (position >= this.nextCheckpoint) {
+				this.nextCheckpoint = this.checkpoints.shift() || this.nextCheckpoint +5000;
+				localStorage.fuels = Math.min(parseInt(localStorage.fuels) + 10, 100); 
+				localStorage.coins = parseInt(localStorage.coins) + 5;
+				this.showCheckpointImage(2000);
+			}
+		}
+		
+	
 }
 
 const bg = new background();
+const coinCollectSound = new Audio('sounds/coin.mp3');
+const fuelCollectSound = new Audio('sounds/fuel.mp3');
 
-// Car related physics
 class play{
 	constructor(){
 		this.ySpeed = 0;
@@ -198,18 +268,21 @@ class play{
 		this.head = new Image();
         this.head.src = 'img/Cars/head.png';
 		this.rSpeed = 0;
-		 // Define the wheels and their positions
-		 const wheelRadius = 40;
-		 this.frontWheel = new Wheel(this.position.x, this.position.y-30, wheelRadius, 'img/Cars/wheel1.png');
-		 this.rearWheel = new Wheel(this.position.x, this.position.y + 25, wheelRadius, 'img/Cars/wheel2.png');
+		const wheelRadius = 40;
+		this.frontWheel = new Wheel(this.position.x, this.position.y-30, wheelRadius, 'img/Cars/wheel1.png');
+		this.rearWheel = new Wheel(this.position.x, this.position.y + 25, wheelRadius, 'img/Cars/wheel2.png');
+
+		this.carMoveSound = new Audio('sounds/carmoving.mp3');
+		this.carMoveSound.loop = true;  
+		this.carMoveSound.volume = 0.07;
 	}
 	draw(){
-		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.6);
-		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.6);
+		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.7);
+		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.7);
 		this.grounded = 0;
 		const makeGrounded = () =>{
 			this.ySpeed -= this.position.y -(this.p1-15); // bounce of car
-			this.position.y = this.p1-15; // remove initail bounce
+			this.position.y = this.p1-15; // remove initial bounce
 			this.grounded = 1; //staying on ground
 		}
 
@@ -248,30 +321,36 @@ class play{
 		this.rearWheel.position.x = 5;
 		this.rearWheel.position.y = 0;
 
-		
-		// Draw the wheels with their updated positions
 		this.frontWheel.rotate(20*speed);
 		this.frontWheel.draw(ctx);
 		
 		this.rearWheel.rotate(20*speed);
 		this.rearWheel.draw(ctx);
     ctx.save();
-    ctx.translate(this.width / 2, -120); // Move pivot point to the car's head
-    ctx.rotate(headTilt); // Rotate for head tilt
-    ctx.drawImage(this.head, -this.width/3, -15, this.width, 40); // Draw head image
+    ctx.translate(this.width / 2, -120); 
+    ctx.rotate(headTilt);
+    ctx.drawImage(this.head, -this.width/3, -15, this.width, 40);
     ctx.restore();
 
     ctx.restore();
-		if (localStorage.feuls > 0) {
-			localStorage.feuls -= speed * 0.008;  // Fuel consumption based on speed
+	if (Math.round(Math.abs(speed)) > 0 && !this.carMoveSound.isPlaying) {
+		this.carMoveSound.play(); 
+		if (game.state === 0) {
+			this.carMoveSound.pause();  
+			this.carMoveSound.currentTime = 0; 
+		}
+	}else if (Math.round(Math.abs(speed)) === 0) {
+		this.carMoveSound.pause();  
+		this.carMoveSound.currentTime = 0; 
+	}
+		if (localStorage.fuels > 0) {
+			localStorage.fuels -= speed * 0.04; 
 		} else {
-			localStorage.feuls = 0;  // Fuel shouldn't go negative
+			localStorage.fuels = 0;  
 		}
 	}
 }
 let player = new play();
-
-// coins 
 
 class coin {
 	constructor(xPos) {
@@ -282,16 +361,15 @@ class coin {
 		this.image.src = 'img/coin.png';
 	}
 	draw(){
-		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.6);
-		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.6);
+		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.7);
+		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.7);
 
 		
 		this.grounded = 0;
 		const makeGrounded = () =>{
-			this.position.y = this.p1-40; // remove initail bounce
-			this.grounded = 1; //staying on ground
+			this.position.y = this.p1-40; 
+			this.grounded = 1; 
 		}
-
 		this.p1 > (this.position.y+15) ? this.ySpeed += 1 : makeGrounded();
 
 		this.position.y += this.ySpeed;
@@ -316,6 +394,7 @@ var coins = {
 	collide: ()=>{
 		coins.allCoins.forEach((item,index,arr)=>{
 		if (item.position.x <= (player.position.x+player.width) && (item.position.x+item.width) >= player.position.x && item.position.y >= (player.position.y-player.height) && (item.position.y-item.height) <= player.position.y){
+			coinCollectSound.play();
 			bg.dashboard.saveCoins();
 			arr.splice(index,1);
 		}
@@ -323,23 +402,23 @@ var coins = {
 	}
 };
 
-class feul {
+class fuel {
 	constructor(xPos) {
 		this.ySpeed = 0;
 		this.position = {x:xPos,y:0};
 		this.width = 50,this.height = 50;
 		this.image = new Image;
-		this.image.src = 'img/feul.png';
+		this.image.src = 'img/fuel.png';
 	}
 	draw(){
-		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.6);
-		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.6);
+		this.p1 = (0.9*c.height-noise(position+this.position.x)*0.7);
+		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.7);
 
 		
 		this.grounded = 0;
 		const makeGrounded = () =>{
-			this.position.y = this.p1-40; // remove initail bounce
-			this.grounded = 1; //staying on ground
+			this.position.y = this.p1-40; 
+			this.grounded = 1; 
 		}
 
 		this.p1 > (this.position.y+15) ? this.ySpeed += 1 : makeGrounded();
@@ -355,17 +434,18 @@ class feul {
 	}
 }
 
-var feuls = {
-	allfeuls : [],
+var fuels = {
+	allFuels : [],
 	add: ()=>{
-		if (feuls.allfeuls.length < 30) {
-			feuls.allfeuls.push(new feul((feuls.allfeuls.length) * ((Math.random() * 1000) + 100)));
+		if (fuels.allFuels.length < 30) {
+			fuels.allFuels.push(new fuel((fuels.allFuels.length) * ((Math.random() * 1000) + 100)));
 		}
-		feuls.allfeuls.forEach((item)=> item.draw());
+		fuels.allFuels.forEach((item)=> item.draw());
 	},
 	collide: ()=>{
-		feuls.allfeuls.forEach((item,index,arr)=>{
+		fuels.allFuels.forEach((item,index,arr)=>{
 		if (item.position.x <= (player.position.x+player.width) && (item.position.x+item.width) >= player.position.x && item.position.y >= (player.position.y-player.height) && (item.position.y-item.height) <= player.position.y){
+			fuelCollectSound.play();
 			bg.dashboard.saveFuel();
 			arr.splice(index,1);
 		}
@@ -373,8 +453,6 @@ var feuls = {
 	}
 };
 
-
-// Objects
 class Object {
 	constructor(x){
 		this.x = x;
@@ -384,8 +462,8 @@ class Object {
 	}
 
 	draw(){
-		this.p1 = (0.9*c.height-noise(this.x)*0.6);
-		this.position.y = this.p1-this.image.height+35;
+		this.p1 = (0.9*c.height-noise(this.x)*0.7);
+		this.position.y = this.p1-this.image.height;
 		this.position.x -= speed;
 
 		ctx.save();
@@ -404,34 +482,40 @@ var objects = {
     }
 };
 
-// functions of keyboard clicks
 
-const keyDown =()=>{
-	window.addEventListener('keydown', e => {
-		switch(e.keyCode){
-			case keys[1]: speed < 5 ? (acc = 0.05,player.rSpeed=(1.5*speed)) : acc=0;break;
-			case keys[0]: position > 0 ? (speed > -2.5? (acc = -0.05,player.rSpeed=(1.5*speed)) : acc=0): (acc = 0,speed=0,position=0);break;
-		}
-	});
-}
+const keyDown = () => {
+    window.addEventListener('keydown', (e) => {
+        switch (e.keyCode) {
+            case keys[1]: // Right arrow
+                speed < 5 ? (acc = 0.05, player.rSpeed = (1.4 * speed)) : acc = 0;
+                break;
+            case keys[0]: // Left arrow
+                position > 0
+                    ? (speed > -2.5
+                        ? (acc = -0.05, player.rSpeed = (1.4 * speed))
+                        : acc = 0)
+                    : (acc = 0, speed = 0, position = 0);
+                break;
+        }
+    });
+};
 
-window.addEventListener('keyup', e => {
-	switch (e.keyCode){
-		case keys[1]: {
-					var interval1 = setInterval(()=>{
-							window.addEventListener('keydown',()=> clearInterval(interval1),keyDown());
-							speed !== 0 ? acc=Math.sign(-speed)*0.025 : (acc= 0,speed = 0,clearInterval(interval1));
-						},10);
-					};break;
-		case keys[0]: {
-					var interval2 = setInterval(()=>{
-							window.addEventListener('keydown',()=> clearInterval(interval2),keyDown());
-							speed !== 0 ? acc = Math.sign(-speed)*0.025 : (acc= 0,clearInterval(interval2));
-						},10);
-					};break;
-		}
-	});
-
+window.addEventListener('keyup', (e) => {
+    switch (e.keyCode) {
+        case keys[1]: {
+            var interval1 = setInterval(() => {
+                window.addEventListener('keydown', () => clearInterval(interval1), keyDown());
+                speed !== 0 ? acc = Math.sign(-speed) * 0.025 : (acc = 0, speed = 0, clearInterval(interval1));
+            }, 10);
+        }; break;
+        case keys[0]: {
+            var interval2 = setInterval(() => {
+                window.addEventListener('keydown', () => clearInterval(interval2), keyDown());
+                speed !== 0 ? acc = Math.sign(-speed) * 0.025 : (acc = 0, clearInterval(interval2));
+            }, 10);
+        }; break;
+    }
+});
 
 // motion of car  
 const loop =(time)=>{
@@ -445,12 +529,14 @@ const loop =(time)=>{
 	player.draw();
 	coins.add();
 	coins.collide();
-	feuls.add();
-	feuls.collide();
-		// End the game if fuel is 0
-		if (localStorage.feuls <= 0) {
-			localStorage.feuls = 0; // Ensure fuel doesn't go negative
-			game.state = 0; // Stop the game loop
+	fuels.add();
+	fuels.collide();
+	bg.drawFuelBar();
+	bg.drawProgressBar();
+    bg.checkCheckpoint();
+		if (localStorage.fuels <= 0) {
+			localStorage.fuels = 0; 
+			game.state = 0;
 			modal.open();
 			modalBox.children[0].innerHTML =
 				"Game Over! <br> Your fuel is depleted. <br> You collected " +
