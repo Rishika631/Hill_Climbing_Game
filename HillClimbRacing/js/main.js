@@ -255,8 +255,6 @@ class background{
 			if (position >= this.nextCheckpoint) {
 				this.nextCheckpoint = this.checkpoints.shift() || this.nextCheckpoint +5000;
 				currentIndex = (currentIndex+1) % this.images.length; 
-				console.log("helloooooo",currentIndex);
-				console.log("helloooooo",this.nextCheckpoint);
 				if(this.nextCheckpoint==5000)
 				{
 					currentIndex = (currentIndex+1) % this.images.length;
