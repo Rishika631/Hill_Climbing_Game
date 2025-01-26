@@ -7,6 +7,7 @@ const modalBox = document.getElementsByClassName('modal')[0];
 
 window.addEventListener('resize',()=>c.width = window.innerWidth);
 
+// local storage will be changed to backend logic.
 if(typeof(localStorage.coins) == "undefined" || localStorage.coins == "NaN"){
 	localStorage.setItem('coins',0);
 }
@@ -63,7 +64,7 @@ const updateHighScore = () => {
 
 class thisGame{
 	constructor(){
-		this.state = 0;		
+		this.state = 0;	
 	}
 	reset(){
 		updateHighScore();
@@ -112,13 +113,19 @@ class Wheel {
     }
 }
 
+		let currentTheme = "default";
+		const themes = ["default","snow"];
+		let currentIndex = 0;
 
 class background{
 	constructor(){
-		this.image = new Image;
-		this.image.src = 'img/tile.png';
-		this.skyImage = new Image;
-        this.skyImage.src = 'img/background.png';
+		this.images = [
+            { sky: 'img/background.png', tile: 'img/tile.png' },
+            { sky: 'img/background2.jpg', tile: 'img/tile2.png' }
+        ];
+		this.skyImage = new Image();
+        this.tileImage = new Image();
+		this.updateImages();
 		this.checkpoints = []; 
         this.nextCheckpoint = 5000; 
         this.createCheckpoints();
@@ -170,10 +177,14 @@ class background{
 
 		this.tile = {
 			draw: ()=>{
-				ctx.drawImage(this.image,0,0,0,c.height,0,0,0,c.height); 
-					for(let i = 0;i < c.width;i++) ctx.drawImage(this.image,i,(0.9*c.height-noise(i+position)*0.7));		
+				ctx.drawImage(this.tileImage,0,0,0,c.height,0,0,0,c.height); 
+					for(let i = 0;i < c.width;i++) ctx.drawImage(this.tileImage,i,(0.9*c.height-noise(i+position)*0.7));		
 			}}
 	}
+	updateImages() {
+        this.skyImage.src = this.images[currentIndex].sky;
+        this.tileImage.src = this.images[currentIndex].tile;
+    }
 	createCheckpoints() {
         for (let i = 1; i <= 20; i++) { 
             this.checkpoints.push(i * 5000);
@@ -243,13 +254,25 @@ class background{
 		checkCheckpoint() {
 			if (position >= this.nextCheckpoint) {
 				this.nextCheckpoint = this.checkpoints.shift() || this.nextCheckpoint +5000;
+				currentIndex = (currentIndex+1) % this.images.length; 
+				console.log("helloooooo",currentIndex);
+				console.log("helloooooo",this.nextCheckpoint);
+				if(this.nextCheckpoint==5000)
+				{
+					currentIndex = (currentIndex+1) % this.images.length;
+				}
+				this.updateImages();
+				currentTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+				if(this.nextCheckpoint==5000)
+				{
+					currentTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+				}
+				objects.changeTheme(currentTheme);
 				localStorage.fuels = Math.min(parseInt(localStorage.fuels) + 10, 100); 
 				localStorage.coins = parseInt(localStorage.coins) + 5;
 				this.showCheckpointImage(2000);
 			}
 		}
-		
-	
 }
 
 const bg = new background();
@@ -281,9 +304,9 @@ class play{
 		this.p2 = (0.9*c.height-noise(position+5+this.position.x)*0.7);
 		this.grounded = 0;
 		const makeGrounded = () =>{
-			this.ySpeed -= this.position.y -(this.p1-15); // bounce of car
-			this.position.y = this.p1-15; // remove initial bounce
-			this.grounded = 1; //staying on ground
+			this.ySpeed -= this.position.y -(this.p1-15); 
+			this.position.y = this.p1-15; 
+			this.grounded = 1; 
 		}
 
 		this.p1 > (this.position.y+15) ? this.ySpeed += 0.3 : makeGrounded();
@@ -307,7 +330,7 @@ class play{
 				this.rSpeed -= this.angle - this.rot;
 			}
 		}
-		let headTilt = Math.sign(speed) * Math.min(Math.abs(speed) / 8, Math.PI / 8); // Speed-based tilt
+		let headTilt = Math.sign(speed) * Math.min(Math.abs(speed) / 8, Math.PI / 8);
 		this.rot -= this.rSpeed/20;
 		ctx.save();
 		ctx.translate(this.position.x,this.position.y);
@@ -455,11 +478,20 @@ var fuels = {
 
 class Object {
 	constructor(x){
-		this.x = x;
-		this.position = {x:this.x, y: 0}
-		this.image = new Image;
-		this.image.src = 'img/objects/'+Math.floor(Math.random()*10+1)+'.png';
+        this.x = x;
+        this.position = { x: this.x, y: 0 };
+        this.image = new Image();
+        this.setRandomImage();
 	}
+	setRandomImage() {
+        const themes = {
+            default: "img/objects/default/",
+            snow: "img/objects/snow/"
+        };
+		const folder = themes[currentTheme];
+        this.image.src = `${folder}${Math.floor(Math.random() * 10 + 1)}.png`;
+    }
+
 
 	draw(){
 		this.p1 = (0.9*c.height-noise(this.x)*0.7);
@@ -479,7 +511,10 @@ var objects = {
             objects.allObjects.push(new Object((objects.allObjects.length) * ((Math.random() * 1000) + 200)));
         }
         objects.allObjects.forEach((item) => item.draw());
-    }
+    },
+		changeTheme: (newTheme) => {
+			objects.allObjects.forEach((item) => item.setRandomImage(newTheme));
+		},
 };
 
 
