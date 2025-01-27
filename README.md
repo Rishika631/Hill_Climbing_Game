@@ -1,4 +1,4 @@
-/**
+
  * Project Description:
  * ---------------------
  * This project is a 2D side-scrolling racing game designed to deliver an engaging experience by combining challenges 
@@ -62,4 +62,4 @@
  * 
  * Overall, this project combines creative visuals, physics-based mechanics, and engaging gameplay to deliver a 
  * fun and challenging experience.
- */
+
