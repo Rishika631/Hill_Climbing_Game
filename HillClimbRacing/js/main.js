@@ -374,7 +374,7 @@ class play{
 			this.grounded = 1; 
 		}
 
-		this.p1 > (this.position.y+15) ? this.ySpeed += 0.3 : makeGrounded();
+		this.p1 > (this.position.y+17) ? this.ySpeed += 0.3 : makeGrounded();
 
 		this.angle = Math.atan2(this.p2-this.position.y-15,5);
 		this.position.y += this.ySpeed;
@@ -587,12 +587,12 @@ const keyDown = () => {
     window.addEventListener('keydown', (e) => {
         switch (e.keyCode) {
             case keys[1]: // Right arrow
-                speed < 5 ? (acc = 0.05, player.rSpeed = (1.4 * speed)) : acc = 0;
+                speed < 10 ? (acc = 0.3, player.rSpeed = (speed)) : acc = 0;
                 break;
             case keys[0]: // Left arrow
                 position > 0
                     ? (speed > -2.5
-                        ? (acc = -0.05, player.rSpeed = (1.4 * speed))
+                        ? (acc = -0.3, player.rSpeed = (speed))
                         : acc = 0)
                     : (acc = 0, speed = 0, position = 0);
                 break;
@@ -605,13 +605,13 @@ window.addEventListener('keyup', (e) => {
         case keys[1]: {
             var interval1 = setInterval(() => {
                 window.addEventListener('keydown', () => clearInterval(interval1), keyDown());
-                speed !== 0 ? acc = Math.sign(-speed) * 0.025 : (acc = 0, speed = 0, clearInterval(interval1));
+                speed !== 0 ? acc = Math.sign(-speed) * 0.25 : (acc = 0, speed = 0, clearInterval(interval1));
             }, 10);
         }; break;
         case keys[0]: {
             var interval2 = setInterval(() => {
                 window.addEventListener('keydown', () => clearInterval(interval2), keyDown());
-                speed !== 0 ? acc = Math.sign(-speed) * 0.025 : (acc = 0, clearInterval(interval2));
+                speed !== 0 ? acc = Math.sign(-speed) * 0.25 : (acc = 0, clearInterval(interval2));
             }, 10);
         }; break;
     }
