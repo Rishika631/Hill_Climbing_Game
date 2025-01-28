@@ -1,6 +1,5 @@
 Game Link: https://rishika631.github.io/Hill_Climbing_Game/HillClimbRacing/
 
-[This game has a lot of animation and features so works smoothly at 120 Refresh Rate otherwise it lags a bit]
 
  * Project Description:
  * This project is a 2D side-scrolling racing game designed to deliver an engaging experience by combining challenges 
