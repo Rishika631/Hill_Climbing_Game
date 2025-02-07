@@ -74,7 +74,6 @@ const modalBox = document.getElementsByClassName('modal')[0];
 
 window.addEventListener('resize',()=>c.width = window.innerWidth);
 
-// local storage will be changed to backend logic.
 if(typeof(localStorage.coins) == "undefined" || localStorage.coins == "NaN"){
 	localStorage.setItem('coins',0);
 }
@@ -90,6 +89,48 @@ let keys = [37,39,38,40];
 let acc = 0;
 let speed = 0;
 let position = 0;
+
+async function registerPlayer() {
+	const playerName = document.getElementById("playerNameInput").value;
+  
+	if (playerName === "") {
+	  alert("Please enter a name");
+	  return;
+	}
+  
+	try {
+	  const response = await fetch("http://localhost:5160/players", {
+		method: "POST",
+		headers: {
+		  "Content-Type": "application/json",
+		},
+		body: JSON.stringify({ PlayerName: playerName }),
+	  });
+  
+	  const data = await response.json()
+  
+	  if (response.ok) {
+		localStorage.setItem("playerName", playerName);
+		console.log(response);
+
+		alert(data.message)
+
+	  } else {
+		console.log("Error response:", data);
+		alert(data);
+	  }
+	} catch (error) {
+	  console.error("Error:", error);
+	  alert("An error occurred. Please try again.");
+	}
+  }
+  if(localStorage.playerName)
+  {
+	document.getElementById("playerNameInput").style.display = 'none';
+	document.getElementById("saveNameButton").style.display = 'none';
+	document.getElementById("saveName").style.display = 'none';
+  }
+  
 
 let layer = [];
 while(layer.length < 255){
@@ -115,7 +156,40 @@ class modals {
 		modalBox.children[0].innerHTML = "Game Over! <br> You have "+localStorage.coins+ " coins";
 	}
 }
-
+async function submitScore() {
+	const playerName = localStorage.getItem("playerName");
+	const score = localStorage.getItem("highScore"); 
+  
+	if (!playerName || !score) {
+	  alert("No player name or score found in local storage.");
+	  return;
+	}
+  
+	try {
+	  const response = await fetch("http://localhost:5160/submit-score", {
+		method: "POST",
+		headers: {
+		  "Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+		  PlayerName: playerName,
+		  Score: parseInt(score),
+		}),
+	  });
+  
+	  const data = await response.json();
+  
+	  if (response.ok) {
+		console.log(data.message); 
+	  } else {
+		alert(data.message); 
+	  }
+	} catch (error) {
+	  console.error("Error:", error);
+	  alert("An error occurred. Please try again.");
+	}
+  }
+  
 const modal = new modals();
 const bgm = new Audio('sounds/bgm.mp3');
 bgm.loop = true;
@@ -127,6 +201,7 @@ const updateHighScore = () => {
     if (currentCoins > highScore) {
         localStorage.highScore = currentCoins;
     }
+	submitScore();
 };
 
 class thisGame{
@@ -213,7 +288,8 @@ class background{
 			 	ctx.fillText(text,x,y);
 			},
 			show: ()=>{
-				this.dashboard.text('#ff4d4d',"High Score: " + localStorage.highScore,50,50); 
+				this.dashboard.text('#ff4d4d',"High Score: " + localStorage.highScore,50,50);
+				this.dashboard.text('#ff4d4d',"Player: " + localStorage.playerName,50,150);  
 				this.dashboard.text('#ff4d4d',Math.round(Math.abs(speed))+' km/h',c.width-300,50); 
 				this.coinImg = new Image();
 				this.coinImg.src = 'img/coin.png';
@@ -221,7 +297,7 @@ class background{
 				this.dashboard.text('#fde318',localStorage.coins,100,100);
 				this.fuelImg = new Image;
 				this.fuelImg.src = 'img/fuel.png';
-				ctx.drawImage(this.fuelImg,c.width-340,75,30,30);
+				ctx.drawImage(this.fuelImg,c.width-340,c.height/10,30,30);
 			},
 			saveCoins: () => {
 				localStorage.coins = ((parseInt(localStorage.coins)) + 1);

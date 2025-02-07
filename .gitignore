@@ -1,1 +1,4 @@
-backend/obj/
+BackendWeb/obj/
+BackendWeb/bin/
+Backend
+.vscode

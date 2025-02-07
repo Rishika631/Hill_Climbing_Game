@@ -8,11 +8,17 @@
 	<div class="modal">
 		<h1 class=""><title>Hill Climb Racing</title>
 		</h1>
-		<img src="img/Cars/car.png" class="modal-content" onclick="game.start()">
-		<div class="options" onclick="game.start()">
+		<img src="img/Cars/car.png" class="modal-content" onclick="{}">
+		<div class="name-container">
+			<h4 id="saveName" class="option-name">Enter Your Name</h4>
+			<input type="text" id="playerNameInput" placeholder="Enter your name" />
+			<button id="saveNameButton" class="save-button" onclick="registerPlayer()">Save Name</button>
+		</div>
 			<div class="option-content">
+			<div class="options" onclick="game.start()">
 				<h4 class="option-name" >Play</h4>
 			</div>
+		</div>
 		</div>
 	</div>
 		<canvas id="canvas"></canvas>

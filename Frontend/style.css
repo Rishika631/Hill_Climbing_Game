@@ -62,7 +62,7 @@ transform: rotate(-20deg);
 display: absolute;
 grid-template-columns: 200px 200px 200px;
 grid-column-gap: 10px;
-padding-bottom: 1rem;
+padding-bottom: 10rem;
 justify-content: center;
 will-change: bottom, opacity;
 
@@ -72,11 +72,11 @@ will-change: bottom, opacity;
 
 transition:padding-bottom 0.3s ease-in-out;
 height: 0;
-padding: 40px 70px;
+padding: 10px 55px 70px 70px;
 background-color: #4caf50;
 display: flex;
 justify-content: center;
-align-items:center;
+
 
 }
 
@@ -85,5 +85,41 @@ align-items:center;
 color:#fff;
 font-size: 3rem;
 
+}
+
+.name-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.name-container h4 {
+    margin-right: 10px;
+    font-size: 1.2rem;
+    color: white;
+}
+
+#playerNameInput {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: none;
+    width: 250px;
+	margin-left: 10px;
+} 
+.save-button {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Add padding */
+    border: none; /* Remove borders */
+    border-radius: 5px; /* Round the corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    font-size: 16px; /* Set font size */
+}
+
+.save-button:hover {
+    background-color: #45a049; /* Darker green on hover */
 }
 
